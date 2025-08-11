@@ -1,0 +1,470 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Data.OleDb;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace gostiniza
+{
+    public partial class FormAut : Form
+    {
+        public FormAut()
+        {
+            InitializeComponent();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            OleDbConnection con = new OleDbConnection(@"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=gg.mdb");
+            OleDbDataAdapter dataAdapter = new OleDbDataAdapter("SELECT Count(*) FROM [пользователь] WHERE login = '" +
+                comboBox1.Text + "' and password = '" + textBox2.Text + "'", con);
+            DataTable dt = new DataTable();
+            dataAdapter.Fill(dt);
+            role.text = comboBox1.Text;
+            FormTables ss = new FormTables();
+            if (dt.Rows[0][0].ToString() == "1")
+            {
+                this.Hide();
+                ss.Show();
+            }
+            else
+            {
+                MessageBox.Show("Неправильно введен Логин и (или) Пароль");
+            }
+        }
+    }
+}
+
+public partial class FormClient : Form
+{
+    OleDbConnection connection;
+    OleDbDataAdapter adapter;
+    DataTable dataTable;
+    public FormClient()
+    {
+        InitializeComponent();
+        connection = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=gg.mdb");
+        adapter = new OleDbDataAdapter("SELECT * FROM [клиент]", connection);
+    }
+
+    private void fill()
+    {//обновление
+        dataTable = new DataTable();
+        adapter.Fill(dataTable);
+        dataGridView1.DataSource = dataTable;
+    }
+
+    private void query(string commtext)
+    {//процедура для работы запросов
+        connection.Open();
+        OleDbCommand command = new OleDbCommand(commtext, connection);
+        command.ExecuteNonQuery();
+        connection.Close();
+    }
+
+    private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
+    {
+        if (!(char.IsLetter(e.KeyChar)) || char.IsControl(e.KeyChar))
+            e.Handled = true;
+    }
+
+    private void textBox2_KeyPress(object sender, KeyPressEventArgs e)
+    {
+        if (!(char.IsLetter(e.KeyChar)) || char.IsControl(e.KeyChar))
+            e.Handled = true;
+    }
+
+    private void textBox3_KeyPress(object sender, KeyPressEventArgs e)
+    {
+        if (!(char.IsLetter(e.KeyChar)) || char.IsControl(e.KeyChar))
+            e.Handled = true;
+    }
+
+    private void maskedTextBox1_KeyPress(object sender, KeyPressEventArgs e)
+    {
+        if (!(char.IsDigit(e.KeyChar)) || char.IsControl(e.KeyChar))
+            e.Handled = true;
+    }
+
+    private void button2_Click(object sender, EventArgs e)
+    {
+        //добавление
+        string commtext;
+        commtext = "INSERT INTO [клиент] (фамилия, имя, отчество, адрес, номер_телефона) " +
+            "VALUES ('" + textBox1.Text + "', '" + textBox2.Text + "', '" + textBox3.Text + "', '" 
+            + textBox4.Text + "', '" + maskedTextBox1.Text + "')";
+        query(commtext);
+        fill();
+    }
+
+    private void FormClient_Load(object sender, EventArgs e)
+    {
+        label3.Text = role.text;
+        fill();
+    }
+
+    private void button3_Click(object sender, EventArgs e)
+    {
+        //удаление
+        string commtext;
+        commtext = "DELETE FROM [клиент] WHERE [код_клиента] = " + dataGridView1.CurrentRow.Cells[0].Value;
+        query(commtext);
+        fill();
+    }
+
+    private void textBox5_TextChanged(object sender, EventArgs e)
+    {
+        //выполнение запроса на основе введенного текста
+        adapter.SelectCommand.CommandText = "SELECT * FROM [клиент] WHERE [фамилия] LIKE '%" + textBox5.Text + "%'";
+        dataTable.Clear();
+        adapter.Fill(dataTable);
+        //подсветка найденной записи
+        dataGridView1.ClearSelection();
+        foreach (DataGridViewRow row in dataGridView1.Rows)
+        {
+            foreach (DataGridViewCell cell in row.Cells)
+            {
+                if (cell.Value != null && cell.Value.ToString().Contains(textBox5.Text))
+                {
+                    row.Selected = true;
+                    row.DefaultCellStyle.BackColor = Color.White;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+public partial class FormPlace : Form
+{
+    OleDbConnection connection;
+    OleDbDataAdapter adapter;
+    DataTable dataTable;
+    public FormPlace()
+    {
+        InitializeComponent();
+        connection = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=gg.mdb");
+        adapter = new OleDbDataAdapter("SELECT * FROM [помещение]", connection);
+    }
+
+    private void fill()
+    {//обновление
+        dataTable = new DataTable();
+        adapter.Fill(dataTable);
+        dataGridView1.DataSource = dataTable;
+    }
+
+    private void query(string commtext)
+    {//процедура для работы запросов
+        connection.Open();
+        OleDbCommand command = new OleDbCommand(commtext, connection);
+        command.ExecuteNonQuery();
+        connection.Close();
+    }
+
+    private void button1_Click(object sender, EventArgs e)
+    {
+        this.Close();
+    }
+
+    private void textBox3_KeyPress(object sender, KeyPressEventArgs e)
+    {
+        if (!(char.IsLetter(e.KeyChar)) || (char.IsControl(e.KeyChar)))
+            e.Handled = true;
+    }
+
+    private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
+    {
+        if (!(char.IsDigit(e.KeyChar)) || (char.IsControl(e.KeyChar)))
+            e.Handled = true;
+    }
+
+    private void FormPlace_Load(object sender, EventArgs e)
+    {
+        label6.Text = role.text;
+        fill();
+    }
+
+    private void button2_Click(object sender, EventArgs e)
+    {
+        //добавление
+        string commtext;
+        commtext = "INSERT INTO [помещение] (количество_комнат, бонусы, статус) " +
+            "VALUES ('" + textBox1.Text + "', '" + textBox2.Text + "', '" + textBox3.Text + "')";
+        query(commtext);
+        fill();
+    }
+
+    private void button3_Click(object sender, EventArgs e)
+    {
+        //удаление
+        string commtext;
+        commtext = "DELETE FROM [помещение] WHERE [номер_фонда] = " + dataGridView1.CurrentRow.Cells[0].Value;
+        query(commtext);
+        fill();
+    }
+
+    private void textBox4_TextChanged(object sender, EventArgs e)
+    {
+        //выполнение запроса на основе введенного текста
+        adapter.SelectCommand.CommandText = "SELECT * FROM [помещение] WHERE [номер_фонда] LIKE '%" + textBox4.Text + "%'";
+        dataTable.Clear();
+        adapter.Fill(dataTable);
+        //подсветка найденной записи
+        dataGridView1.ClearSelection();
+        foreach (DataGridViewRow row in dataGridView1.Rows)
+        {
+            foreach (DataGridViewCell cell in row.Cells)
+            {
+                if (cell.Value != null && cell.Value.ToString().Contains(textBox4.Text))
+                {
+                    row.Selected = true;
+                    row.DefaultCellStyle.BackColor = Color.White;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+public partial class FormTables : Form
+{
+    public FormTables()
+    {
+        InitializeComponent();
+    }
+
+    private void button4_Click(object sender, EventArgs e)
+    {
+        Application.Exit();
+    }
+
+    private void button1_Click(object sender, EventArgs e)
+    {
+        FormClient ss = new FormClient();
+        ss.Show();
+    }
+
+    private void button2_Click(object sender, EventArgs e)
+    {
+        FormZhurnal ss = new FormZhurnal();
+        ss.Show();
+    }
+
+    private void button3_Click(object sender, EventArgs e)
+    {
+        FormUcluga ss = new FormUcluga();
+        ss.Show();
+    }
+
+    private void button5_Click(object sender, EventArgs e)
+    {
+        FormPlace ss = new FormPlace();
+        ss.Show();
+    }
+
+    private void FormTables_Load(object sender, EventArgs e)
+    {
+        label2.Text = role.text;
+        if (role.text == "администратор")
+        {
+            button3.Enabled = false;
+            button5.Enabled = false;
+        }
+        else
+        {
+            button1.Enabled = false;
+            button2.Enabled = false;
+        }
+    }
+}
+
+public partial class FormUcluga : Form
+{
+    OleDbConnection connection;
+    OleDbDataAdapter adapter;
+    DataTable dataTable;
+    public FormUcluga()
+    {
+        InitializeComponent();
+        connection = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=gg.mdb");
+        adapter = new OleDbDataAdapter("SELECT * FROM [услуга]", connection);
+    }
+
+    private void fill()
+    {//обновление
+        dataTable = new DataTable();
+        adapter.Fill(dataTable);
+        dataGridView1.DataSource = dataTable;
+    }
+
+    private void query(string commtext)
+    {//процедура для работы запросов
+        connection.Open();
+        OleDbCommand command = new OleDbCommand(commtext, connection);
+        command.ExecuteNonQuery();
+        connection.Close();
+    }
+
+    private void FormUcluga_Load(object sender, EventArgs e)
+    {
+        label5.Text = role.text;
+        fill();
+    }
+
+    private void button2_Click(object sender, EventArgs e)
+    {
+        //добавление
+        string commtext;
+        commtext = "INSERT INTO [услуга] (наименование, стоимость) " +
+            "VALUES ('" + textBox1.Text + "', '" + textBox2.Text + "')";
+        query(commtext);
+        fill();
+    }
+
+    private void button3_Click(object sender, EventArgs e)
+    {
+        //удаление
+        string commtext;
+        commtext = "DELETE FROM [услуга] WHERE [код_услуги] = " + dataGridView1.CurrentRow.Cells[0].Value;
+        query(commtext);
+        fill();
+    }
+
+    private void textBox3_TextChanged(object sender, EventArgs e)
+    {
+        //выполнение запроса на основе введенного текста
+        adapter.SelectCommand.CommandText = "SELECT * FROM [услуга] WHERE [наименование] LIKE '%" + textBox3.Text + "%'";
+        dataTable.Clear();
+        adapter.Fill(dataTable);
+        //подсветка найденной записи
+        dataGridView1.ClearSelection();
+        foreach (DataGridViewRow row in dataGridView1.Rows)
+        {
+            foreach (DataGridViewCell cell in row.Cells)
+            {
+                if (cell.Value != null && cell.Value.ToString().Contains(textBox3.Text))
+                {
+                    row.Selected = true;
+                    row.DefaultCellStyle.BackColor = Color.White;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+    public partial class FormZhurnal : Form
+    {
+        OleDbConnection connection;
+        OleDbDataAdapter adapter;
+        DataTable dataTable;
+
+        public FormZhurnal()
+        {
+            InitializeComponent();
+            connection = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=gg.mdb");
+            adapter = new OleDbDataAdapter("SELECT * FROM [журнал]", connection);
+
+        }
+
+        private void fill()
+        {//обновление
+            dataTable = new DataTable();
+            adapter.Fill(dataTable);
+            dataGridView1.DataSource = dataTable;
+        }
+
+        private void query(string commtext)
+        {//процедура для работы запросов
+            connection.Open();
+            OleDbCommand command = new OleDbCommand(commtext, connection);
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
+
+        private void FormZhurnal_Load(object sender, EventArgs e)
+        {
+            label3.Text = role.text;
+            fill();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            //добавление
+            string commtext;
+            commtext = "INSERT INTO [журнал] (код_клиента, цена_номера, дата_заселения, дата_выселения, номер_фонда, код_услуги) " +
+                "VALUES ('" + textBox1.Text + "', '" + textBox5.Text + "', '" + maskedTextBox1.Text + "', '" + maskedTextBox2.Text + "', " +
+                "'" + textBox2.Text + "', '" + textBox3.Text + "')";
+            query(commtext);
+            fill();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            //удаление
+            string commtext;
+            commtext = "DELETE FROM [журнал] WHERE [код_записи] = " + dataGridView1.CurrentRow.Cells[0].Value;
+            query(commtext);
+            fill();
+        }
+
+        private void textBox4_TextChanged(object sender, EventArgs e)
+        {
+            //выполнение запроса на основе введенного текста
+            adapter.SelectCommand.CommandText = "SELECT * FROM [журнал] WHERE [код_записи] LIKE '%" + textBox4.Text + "%'";
+            dataTable.Clear();
+            adapter.Fill(dataTable);
+            //подсветка найденной записи
+            dataGridView1.ClearSelection();
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                foreach (DataGridViewCell cell in row.Cells)
+                {
+                    if (cell.Value != null && cell.Value.ToString().Contains(textBox4.Text))
+                    {
+                        row.Selected = true;
+                        row.DefaultCellStyle.BackColor = Color.White;
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            List<string> rows = new List<string>();
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                string line = string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}",
+                    row.Cells["код_клиента"].Value,
+                    row.Cells["цена_номера"].Value,
+                    row.Cells["дата_заселения"].Value,
+                    row.Cells["дата_выселения"].Value,
+                    row.Cells["прибыль"].Value,
+                    row.Cells["номер_фонда"].Value);
+                rows.Add(line);
+            }
+
+            string filePath = "data.txt";
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                foreach (string line in rows)
+                {
+                    writer.WriteLine(line);
+                }
+            }
+
+            MessageBox.Show("Данные успешно записаны в документ.");
+        }
+    }
+
+class role
+{
+    public static string text;
+}
