@@ -1,0 +1,788 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Data.OleDb;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace fitnes
+{
+    public partial class FormTableClient : Form
+    {
+        Query controller;
+        
+        private OleDbConnection connection;
+        private OleDbDataAdapter adapter;
+        private DataTable table;
+        
+
+        public FormTableClient()
+        {
+            InitializeComponent();
+            InitializeDatabase();
+            InitializeDataGridView();
+            controller = new Query(ConnectionString.ConnStr);
+            dataGridView1.DataSource = controller.upDateClient();
+
+        }
+
+        private void InitializeDatabase()
+        {
+            connection = new OleDbConnection(@"Provider = Microsoft.Jet.OLEDB.4.0; Data Source = fitn.mdb");
+            adapter = new OleDbDataAdapter("SELECT * FROM клиент", connection);
+            table = new DataTable();
+        }
+
+        private void InitializeDataGridView()
+        {
+            //привязка к таблице
+            dataGridView1.DataSource = table;
+            //автоматическое создание столбцов на основе данных из таблицы
+            dataGridView1.AutoGenerateColumns = true;
+            //автоматическое изменение размеров столбцов для лучшего отображения данных
+            dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            dataGridView1.ColumnHeadersVisible = true;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void label10_Click(object sender, EventArgs e)
+        {
+            RedactClient ss = new RedactClient();
+            ss.Show();        
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void label10_Click_1(object sender, EventArgs e)
+        {
+            RedactClient ss = new RedactClient();
+            ss.Show();
+        }
+        Point lastpoint;
+        private void panel2_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                this.Left += e.X - lastpoint.X;
+                this.Top += e.Y - lastpoint.Y;
+            }
+        }
+
+        private void panel2_MouseDown(object sender, MouseEventArgs e)
+        {
+            lastpoint = new Point(e.X, e.Y);
+        }
+
+        private void FormTableClient_Load(object sender, EventArgs e)
+        {
+            
+            // TODO: данная строка кода позволяет загрузить данные в таблицу "fitnDataSet24.клиент". При необходимости она может быть перемещена или удалена.
+            this.клиентTableAdapter.Fill(this.fitnDataSet24.клиент);
+            
+          
+            label7.Text = Role.text;
+            if (label7.Text == "admin1" || label7.Text == "admin2" || label7.Text == "admin3")
+            {                                //если авторизованные пользователи - не 3 админа,
+                label3.Enabled = true;       //выполняется код, открывающий доступ к формам редактирования
+                label2.Enabled = true;
+                label10.Enabled = true;
+            }
+            else
+            {
+                label3.Enabled = false;       //выполняется код, закрывающий доступ к формам редактирования
+                label2.Enabled = false;
+                label10.Enabled = false;
+            }
+        }
+
+        public void label3_Click(object sender, EventArgs e)
+        {
+            RedactClient ss = new RedactClient();
+            ss.Show();
+
+        }
+
+        public void label2_Click(object sender, EventArgs e)
+        {
+            RedactClient ss = new RedactClient();
+            ss.Show();
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            //выполнение запроса на основе введенного текста
+            adapter.SelectCommand.CommandText = "SELECT * FROM клиент WHERE фамилия LIKE '%" + textBox1.Text + "%'";
+            table.Clear();
+            adapter.Fill(table);
+            //подсветка найденной записи
+            dataGridView1.ClearSelection();
+            foreach (DataGridViewRow row in dataGridView1.Rows)
+            {
+                foreach (DataGridViewCell cell in row.Cells)
+                {
+                    if (cell.Value != null && cell.Value.ToString().Contains(textBox1.Text))
+                    {
+                        row.Selected = true;
+                        row.DefaultCellStyle.BackColor = Color.White;
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void label9_Click(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
+
+public partial class FormTableRaspisanie : Form
+{
+    RaspRedact Redact;
+    LoginForm Logg;
+    Query controller;
+    private OleDbConnection connection;
+    private OleDbDataAdapter adapter;
+    private DataTable table;
+    public FormTableRaspisanie()
+    {
+        InitializeComponent();
+        InitializeDatabase();
+        InitializeDataGridView();
+        controller = new Query(ConnectionString.ConnStr);
+        dataGridView1.DataSource = controller.upDateRasp();
+    }
+
+    private void InitializeDatabase()
+    {
+        connection = new OleDbConnection(@"Provider = Microsoft.Jet.OLEDB.4.0; Data Source = fitn.mdb");
+        adapter = new OleDbDataAdapter("SELECT * FROM расписание", connection);
+        table = new DataTable();
+    }
+
+    private void InitializeDataGridView()
+    {
+        //привязка к таблице
+        dataGridView1.DataSource = table;
+        //автоматическое создание столбцов на основе данных из таблицы
+        dataGridView1.AutoGenerateColumns = true;
+        //автоматическое изменение размеров столбцов для лучшего отображения данных
+        dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+        dataGridView1.ColumnHeadersVisible = true;
+    }
+    public void FormTableRaspisanie_Load(object sender, EventArgs e)
+    {
+       
+        label6.Text = Role.text;
+        if (label6.Text == "admin1" || label6.Text == "admin2" || label6.Text == "admin3")
+        {
+            label10.Enabled = true;
+            label2.Enabled = true;
+            label3.Enabled = true;
+        }
+        else 
+        {
+            label10.Enabled = false;
+            label2.Enabled = false;
+            label3.Enabled = false;
+        }
+    }
+
+    private void label10_Click(object sender, EventArgs e)
+    {
+        RaspRedact ss = new RaspRedact();
+        ss.Show();
+    }
+
+    private void button1_Click(object sender, EventArgs e)
+    {
+        this.Close();
+    }
+
+    private void label1_Click(object sender, EventArgs e)
+    {
+        this.Close();
+    }
+
+    private void button1_Click_1(object sender, EventArgs e)
+    {
+        this.Close();
+    }
+
+    private void label10_Click_1(object sender, EventArgs e)
+    {
+            Logg = new LoginForm();
+            Redact = new RaspRedact();
+            Redact.Show();
+    }
+
+    public void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+    {
+
+    }
+    Point lastpoint;
+    private void panel2_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Left)
+        {
+            this.Left += e.X - lastpoint.X;
+            this.Top += e.Y - lastpoint.Y;
+        }
+    }
+
+    private void panel2_MouseDown(object sender, MouseEventArgs e)
+    {
+        lastpoint = new Point(e.X, e.Y);
+    }
+
+    public void label3_Click(object sender, EventArgs e)
+    {
+        Redact = new RaspRedact();
+        Redact.Show();
+    }
+
+    private void panel2_Paint(object sender, PaintEventArgs e)
+    {
+
+    }
+
+    private void textBox1_TextChanged(object sender, EventArgs e)
+    {
+        //выполнение запроса на основе введенного текста
+        adapter.SelectCommand.CommandText = "SELECT * FROM расписание WHERE дата LIKE '%" + textBox1.Text + "%'";
+        table.Clear();
+        adapter.Fill(table);
+        //подсветка найденной записи
+        dataGridView1.ClearSelection();
+        foreach (DataGridViewRow row in dataGridView1.Rows)
+        {
+            foreach (DataGridViewCell cell in row.Cells)
+            {
+                if (cell.Value != null && cell.Value.ToString().Contains(textBox1.Text))
+                {
+                    row.Selected = true;
+                    row.DefaultCellStyle.BackColor = Color.White;
+                    break;
+                }
+            }
+        }
+    }
+
+    private void label2_Click(object sender, EventArgs e)
+    {
+        Redact = new RaspRedact();
+        Redact.Show();
+        //удаление
+    }
+}
+
+public partial class FormTableSotrud : Form
+{
+    Query controller;
+    private OleDbConnection connection;
+    private OleDbDataAdapter adapter;
+    private DataTable table;
+    public FormTableSotrud()
+    {
+        InitializeComponent();
+        InitializeDatabase();
+        InitializeDataGridView();
+        controller = new Query(ConnectionString.ConnStr);
+        dataGridView1.DataSource = controller.upDateSotr();
+    }
+
+    private void InitializeDatabase()
+    {
+        connection = new OleDbConnection(@"Provider = Microsoft.Jet.OLEDB.4.0; Data Source = fitn.mdb");
+        adapter = new OleDbDataAdapter("SELECT * FROM сотрудники", connection);
+        table = new DataTable();
+    }
+
+    private void InitializeDataGridView()
+    {
+        //привязка к таблице
+        dataGridView1.DataSource = table;
+        //автоматическое создание столбцов на основе данных из таблицы
+        dataGridView1.AutoGenerateColumns = true;
+        //автоматическое изменение размеров столбцов для лучшего отображения данных
+        dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+        dataGridView1.ColumnHeadersVisible = true;
+    }
+
+    private void FormTableSotrud_Load(object sender, EventArgs e)
+    {
+        // TODO: данная строка кода позволяет загрузить данные в таблицу "fitnDataSet28.сотрудники". При необходимости она может быть перемещена или удалена.
+        this.сотрудникиTableAdapter.Fill(this.fitnDataSet28.сотрудники);
+        label7.Text = Role.text;
+        if (label7.Text == "admin1" || label7.Text == "admin2" || label7.Text == "admin3")
+        {
+            label3.Enabled = true;
+            label5.Enabled = true;
+            label4.Enabled = true;
+        }
+        else 
+        { 
+            label3.Enabled = false;
+            label5.Enabled = false;
+            label4.Enabled = false;
+        }
+    }
+
+    private void label3_Click(object sender, EventArgs e)
+    {
+        SotrudRedact ss = new SotrudRedact();
+        ss.Show();
+    }
+
+    private void button1_Click(object sender, EventArgs e)
+    {
+        this.Close();
+    }
+
+    private void label1_Click(object sender, EventArgs e)
+    {
+        this.Close();
+    }
+
+    private void label3_Click_1(object sender, EventArgs e)
+    {
+        SotrudRedact ss = new SotrudRedact();
+        ss.Show();
+    }
+
+    private void button1_Click_1(object sender, EventArgs e)
+    {
+        this.Close();
+    }
+    Point lastpoint;
+    private void panel2_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Left)
+        {
+            this.Left += e.X - lastpoint.X; //перемещение влево-вправо 
+            this.Top += e.Y - lastpoint.Y; //перемещение вверх-вниз
+        }
+    }
+
+    private void panel2_MouseDown(object sender, MouseEventArgs e)
+    {
+        lastpoint = new Point(e.X, e.Y);
+    }
+
+    private void label5_Click(object sender, EventArgs e)
+    {
+        SotrudRedact ss = new SotrudRedact();
+        ss.Show();
+
+        
+    }
+
+    private void label4_Click(object sender, EventArgs e)
+    {
+        SotrudRedact ss = new SotrudRedact();
+        ss.Show();
+
+    }
+
+    private void textBox1_TextChanged(object sender, EventArgs e)
+    {
+        //выполнение запроса на основе введенного текста
+        adapter.SelectCommand.CommandText = "SELECT * FROM сотрудники WHERE [код сотрудника] LIKE '%" + textBox1.Text + "%'";
+        table.Clear();
+        adapter.Fill(table);
+        //подсветка найденной записи
+        dataGridView1.ClearSelection();
+        foreach (DataGridViewRow row in dataGridView1.Rows)
+        {
+            foreach (DataGridViewCell cell in row.Cells)
+            {
+                if (cell.Value != null && cell.Value.ToString().Contains(textBox1.Text))
+                {
+                    row.Selected = true;
+                    row.DefaultCellStyle.BackColor = Color.White;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+public partial class GeneralForm : Form
+{
+    public GeneralForm()
+    {
+        InitializeComponent();
+    }
+
+    private void label2_MouseLeave(object sender, EventArgs e)
+    {
+        label2.ForeColor = Color.Black;
+    }
+
+    private void label2_MouseEnter(object sender, EventArgs e)
+    {
+        label2.ForeColor = Color.Orange;
+    }
+
+    private void label2_Click(object sender, EventArgs e)
+    {
+        this.Close();
+    }
+
+    private void button3_Click(object sender, EventArgs e)
+    {
+        MessageBox.Show("Для продолжения работы, необходима авторизация!");
+    }
+
+    private void button1_Click(object sender, EventArgs e)
+    {
+        LoginForm ss = new LoginForm();
+        ss.Show();
+    }
+
+    private void button2_Click(object sender, EventArgs e)
+    {
+        RegistrationForm ss = new RegistrationForm();
+        ss.Show();
+    }
+}
+
+public partial class LoginForm : Form
+{
+    public LoginForm()
+    {
+        InitializeComponent();
+        this.textBox2.AutoSize = false;
+        this.textBox2.Size = new System.Drawing.Size(this.textBox2.Size.Width, 24);
+    }
+
+    private void label2_Click(object sender, System.EventArgs e)
+    {
+        this.Close();
+    }
+
+    private void label2_MouseEnter(object sender, System.EventArgs e)
+    {
+        label2.ForeColor = Color.Green;
+    }
+
+    private void label2_MouseLeave(object sender, System.EventArgs e)
+    {
+        label2.ForeColor = Color.Black;
+    }
+
+    Point lastpoint; 
+    private void panel1_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Left)
+        {
+            this.Left += e.X - lastpoint.X;
+            this.Top += e.Y - lastpoint.Y;
+        }
+    }
+
+    private void panel1_MouseDown(object sender, MouseEventArgs e)
+    {
+        lastpoint = new Point(e.X, e.Y);
+    }
+
+    private void button1_Click(object sender, System.EventArgs e)
+    {
+        OleDbConnection con = new OleDbConnection(@"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=fitn.mdb");
+        OleDbDataAdapter dataAdapter = new OleDbDataAdapter("SELECT Count(*) FROM [user] WHERE log = '" + 
+            textBox1.Text + "' and pass = '" + textBox3.Text + "'", con);
+        DataTable dt = new DataTable();
+        dataAdapter.Fill(dt);
+        UsingForm ss = new UsingForm();
+        Role.text = textBox1.Text;
+        if (dt.Rows[0][0].ToString() == "1")
+        {
+            this.Hide();
+            //FormTableRaspisanie.label10 visile = false;
+            ss.Show();
+        }
+        else
+        {
+            MessageBox.Show("Неправильно введен Логин и (или) Пароль");
+        }
+    }
+
+    private void button2_Click(object sender, System.EventArgs e)
+    {
+        RegistrationForm ss = new RegistrationForm();
+        ss.Show();
+    }
+}
+
+public partial class RaspRedact : Form
+{
+    Query controller;
+    FormTableRaspisanie Form1;
+    public RaspRedact()
+    {
+        InitializeComponent();
+        controller = new Query(ConnectionString.ConnStr);
+    }
+
+    private void button1_Click(object sender, EventArgs e)
+    {
+        this.Close();
+    }
+
+    private void button1_Click_1(object sender, EventArgs e)
+    {
+        this.Close();
+    }
+
+    public void button3_Click(object sender, EventArgs e)
+    {
+        Form1 = new FormTableRaspisanie();
+        controller.AddRasp(int.Parse(textBox1.Text), maskedTextBox1.Text,
+        comboBox1.SelectedItem.ToString(), comboBox2.SelectedItem.ToString(), comboBox3.SelectedItem.ToString(),
+        int.Parse(textBox6.Text), int.Parse(textBox7.Text));
+        Form1.dataGridView1.DataSource = controller.upDateRasp();
+        MessageBox.Show("Запись добавлена!");
+    }
+
+    Point lastpoint;
+    private void panel2_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Left)
+        {
+            this.Left += e.X - lastpoint.X;
+            this.Top += e.Y - lastpoint.Y;
+        }
+    }
+
+    private void panel2_MouseDown(object sender, MouseEventArgs e)
+    {
+        lastpoint = new Point(e.X, e.Y);
+    }
+
+    private void label1_Click(object sender, EventArgs e)
+    {
+        this.Close();
+    }
+
+    public void button2_Click(object sender, EventArgs e)
+    {
+        Form1 = new FormTableRaspisanie(); //подключение формы с таблицей "Расписание"
+        int ind, pp, kod_sotr, kod_cl;           //перечисление типизированных переменных
+        string date, vr_nach, vr_zak, place;
+        ind = Form1.dataGridView1.CurrentRow.Index; //задание переменной индекса, чтобы проходить по строкам
+        pp = int.Parse(Form1.dataGridView1[1, ind].Value.ToString());
+        date = Form1.dataGridView1[2, ind].Value.ToString();
+        vr_nach = Form1.dataGridView1[3, ind].Value.ToString(); //проходим по строкам
+        vr_zak = Form1.dataGridView1[4, ind].Value.ToString();
+        place = Form1.dataGridView1[5, ind].Value.ToString();
+        kod_sotr = int.Parse(Form1.dataGridView1[6, ind].Value.ToString());
+        kod_cl = int.Parse(Form1.dataGridView1[7, ind].Value.ToString());
+        textBox1.Text = pp.ToString();
+        maskedTextBox1.Text = date;
+        comboBox1.Text = vr_nach; //присваиваем значения полей таблицы значениям переменных
+        comboBox2.Text = vr_zak;
+        comboBox3.Text = place;
+        textBox6.Text = kod_sotr.ToString();
+        textBox7.Text = kod_cl.ToString(); { //выполнение запроса
+            controller.EditPasp(int.Parse(textBox1.Text), maskedTextBox1.Text,
+            comboBox1.SelectedValue.ToString(), comboBox2.SelectedValue.ToString(),
+            comboBox3.SelectedValue.ToString(), int.Parse(textBox6.Text), int.Parse(textBox7.Text));
+            Form1.dataGridView1.DataSource = controller.upDateRasp();
+            MessageBox.Show("Запись успешно изменена!"); //вывод сообщения
+        }
+
+    }
+
+    private void button4_Click(object sender, EventArgs e)
+    {
+        Form1 = new FormTableRaspisanie();
+        controller.DeleteRasp(int.Parse(Form1.dataGridView1.Rows[Form1.dataGridView1.CurrentRow.Index].Cells["№ппDataGridViewTextBoxColumn"].Value.ToString()));
+        Form1.dataGridView1.DataSource = controller.upDateRasp();
+        MessageBox.Show("Запись успешно удалена!");
+    }
+}
+
+public partial class RegistrationForm : Form
+{
+    Query controller;
+    public RegistrationForm()
+    {
+        InitializeComponent();
+        controller = new Query(ConnectionString.ConnStr);
+    }
+
+    private void label1_Click(object sender, EventArgs e)
+    {
+        this.Close();
+    }
+
+    private void label1_MouseLeave(object sender, EventArgs e)
+    {
+        label1.ForeColor = Color.Black;
+    }
+
+    private void label1_MouseEnter(object sender, EventArgs e)
+    {
+        label1.ForeColor = Color.Green;
+    }
+
+    private void button2_Click(object sender, EventArgs e)
+    {
+        this.Close();
+    }
+
+    private void button2_Click_1(object sender, EventArgs e)
+    {
+        this.Close();
+    }
+
+    private void button1_Click(object sender, EventArgs e)
+    {
+        RegistrationForm registration = new RegistrationForm();
+        if (registration.ShowDialog() == DialogResult.OK)
+        {
+            controller.AddRegistration(textBox1.Text, textBox3.Text); //подключение запроса
+            UsingForm form1 = new UsingForm();
+            form1.ShowDialog();
+        }
+    }
+
+    Point lastpoint;
+    private void panel2_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Left)
+        {
+            this.Left += e.X - lastpoint.X;
+            this.Top += e.Y - lastpoint.Y;
+        }
+    }
+
+    private void panel2_MouseDown(object sender, MouseEventArgs e)
+    {
+        lastpoint = new Point(e.X, e.Y);
+    }
+}
+
+class Role
+{
+    public static string text;
+}
+
+public partial class UsingForm : Form
+{
+    public UsingForm()
+    {
+        InitializeComponent();
+    }
+
+    private void label1_Click(object sender, EventArgs e)
+    {
+        this.Close();
+    }
+
+    private void button4_Click(object sender, EventArgs e)
+    {
+        this.Close();
+    }
+
+    private void button1_Click(object sender, EventArgs e)
+    {
+        FormTableClient ss = new FormTableClient();
+        ss.Show();
+    }
+
+    private void button2_Click(object sender, EventArgs e)
+    {
+        FormTableRaspisanie ss = new FormTableRaspisanie();
+        ss.Show();
+    }
+
+    private void button3_Click(object sender, EventArgs e)
+    {
+        FormTableSotrud ss = new FormTableSotrud();
+        ss.Show();
+    }
+
+    private void button2_Click_1(object sender, EventArgs e)
+    {
+        FormTableRaspisanie ss = new FormTableRaspisanie();
+        ss.Show();
+    }
+
+    private void button3_Click_1(object sender, EventArgs e)
+    {
+        FormTableSotrud ss = new FormTableSotrud();
+        ss.Show();
+    }
+
+    private void button4_Click_1(object sender, EventArgs e)
+    {
+        this.Close();
+    }
+
+    private void button1_Click_1(object sender, EventArgs e)
+    {
+        FormTableClient ss = new FormTableClient();
+        ss.Show();
+    }
+    Point lastpoint;
+    private void panel2_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Left)
+        {
+            this.Left += e.X - lastpoint.X;
+            this.Top += e.Y - lastpoint.Y;
+        }
+    }
+
+    private void panel2_MouseDown(object sender, MouseEventArgs e)
+    {
+        lastpoint = new Point(e.X, e.Y);
+    }
+
+    private void panel2_Paint(object sender, PaintEventArgs e)
+    {
+
+    }
+
+    private void UsingForm_Load(object sender, EventArgs e)
+    {
+        label4.Text = Role.text;
+
+
+        if (label4.Text == "admin2" || label4.Text == "admin1" || label4.Text == "admin3")
+        {
+            button1.Enabled = true;          //если заходят первые три администратора,
+            button2.Enabled = true;          //им открывается доступ ко всем кнопкам
+            button3.Enabled = true;
+        }
+        else
+        {
+            button1.Enabled = false; //в ином случае срабатывает эта часть кода
+            button2.Enabled = true;  //все остальные могут просматривать 
+            button3.Enabled = true;  //информацию о сотрудниках и расписании
+        }
+    }
+}
